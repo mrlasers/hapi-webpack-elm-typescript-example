@@ -1,0 +1,29 @@
+{
+  "name": "hapi-webpack-dev",
+  "packageManager": "yarn@3.2.2",
+  "scripts": {
+    "dev": "tsnd ./server/server.ts"
+  },
+  "installConfig": {
+    "pnp": true
+  },
+  "devDependencies": {
+    "@types/hapi__hapi": "^20.0.12",
+    "@types/node": "^18.7.6",
+    "@types/webpack-hot-middleware": "^2",
+    "@yarnpkg/pnpify": "^4.0.0-rc.14",
+    "elm-hot-webpack-loader": "^1.1.8",
+    "elm-webpack-loader": "^8.0.0",
+    "html-webpack-plugin": "^5.5.0",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.7.4",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-middleware": "^5.3.3",
+    "webpack-hot-middleware": "^2.25.2"
+  },
+  "dependencies": {
+    "@hapi/hapi": "^20.2.2"
+  }
+}

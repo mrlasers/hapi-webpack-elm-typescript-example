@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "lib": ["ESNext"],
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": true
+  },
+  "include": ["server/**/*"]
+}
