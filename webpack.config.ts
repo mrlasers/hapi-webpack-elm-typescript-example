@@ -1,4 +1,5 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import Path from 'path'
 import Webpack, { Configuration } from 'webpack'
 import { merge } from 'webpack-merge'
@@ -11,7 +12,7 @@ export const buildMode =
 
 const commonConfig: Configuration = {
   mode: buildMode,
-  entry: ['./client/static/index.js'],
+  entry: ['./client/static/index.js', './client/static/styles/main.scss'],
   resolve: {
     extensions: ['.js', '.elm'],
   },
@@ -42,6 +43,10 @@ const devConfig: Configuration = {
         exclude: [/elm-stuff/, /node_modules/],
         use: ['elm-hot-webpack-loader', 'elm-webpack-loader'],
       },
+      {
+        test: /\.sc?ss$/,
+        use: ['style-loader', 'css-loader', 'sass-loader'],
+      },
     ],
   },
   plugins: [new Webpack.HotModuleReplacementPlugin()],
@@ -55,6 +60,10 @@ const prodConfig: Configuration = {
         exclude: [/elm-stuff/, /node_moduls/],
         use: ['elm-webpack-loader'],
       },
+      {
+        test: /\.sc?ss$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+      },
     ],
   },
   output: {
@@ -62,6 +71,7 @@ const prodConfig: Configuration = {
     path: Path.resolve(__dirname, 'dist/public'),
     publicPath: '/',
   },
+  plugins: [new MiniCssExtractPlugin()],
 }
 
 const mergedConfig = merge(commonConfig, isDev ? devConfig : prodConfig)

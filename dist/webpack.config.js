@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildMode = void 0;
 const html_webpack_plugin_1 = __importDefault(require("html-webpack-plugin"));
+const mini_css_extract_plugin_1 = __importDefault(require("mini-css-extract-plugin"));
 const path_1 = __importDefault(require("path"));
 const webpack_1 = __importDefault(require("webpack"));
 const webpack_merge_1 = require("webpack-merge");
@@ -13,7 +14,7 @@ const isDev = !isProd;
 exports.buildMode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 const commonConfig = {
     mode: exports.buildMode,
-    entry: ['./client/static/index.js'],
+    entry: ['./client/static/index.js', './client/static/styles/main.scss'],
     resolve: {
         extensions: ['.js', '.elm'],
     },
@@ -43,6 +44,10 @@ const devConfig = {
                 exclude: [/elm-stuff/, /node_modules/],
                 use: ['elm-hot-webpack-loader', 'elm-webpack-loader'],
             },
+            {
+                test: /\.sc?ss$/,
+                use: ['style-loader', 'css-loader', 'sass-loader'],
+            },
         ],
     },
     plugins: [new webpack_1.default.HotModuleReplacementPlugin()],
@@ -55,6 +60,10 @@ const prodConfig = {
                 exclude: [/elm-stuff/, /node_moduls/],
                 use: ['elm-webpack-loader'],
             },
+            {
+                test: /\.sc?ss$/,
+                use: [mini_css_extract_plugin_1.default.loader, 'css-loader', 'sass-loader'],
+            },
         ],
     },
     output: {
@@ -62,6 +71,7 @@ const prodConfig = {
         path: path_1.default.resolve(__dirname, 'dist/public'),
         publicPath: '/',
     },
+    plugins: [new mini_css_extract_plugin_1.default()],
 };
 const mergedConfig = (0, webpack_merge_1.merge)(commonConfig, isDev ? devConfig : prodConfig);
 exports.default = mergedConfig;

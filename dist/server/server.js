@@ -66,7 +66,7 @@ function init() {
                     },
                     handler: (request, h) => {
                         const { file } = request.params;
-                        return !!file.match(/\.js$/)
+                        return !!file.match(/\.(js|css)$/)
                             ? h.file(`../public/${file}`)
                             : h.file('../public/index.html');
                     },
