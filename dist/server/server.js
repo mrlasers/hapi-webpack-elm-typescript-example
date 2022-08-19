@@ -39,48 +39,104 @@ const path_1 = __importDefault(require("path"));
 const webpack_1 = __importDefault(require("webpack"));
 const webpack_dev_middleware_1 = __importDefault(require("webpack-dev-middleware"));
 const webpack_hot_middleware_1 = __importDefault(require("webpack-hot-middleware"));
+const boom_1 = __importDefault(require("@hapi/boom"));
 const hapi_1 = __importDefault(require("@hapi/hapi"));
 const webpack_config_1 = __importStar(require("../webpack.config"));
-console.log('SERVER!!!!:', webpack_config_1.buildMode);
+console.log("SERVER!!!!:", webpack_config_1.buildMode);
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
         const server = hapi_1.default.server({
             port: 8000,
-            host: 'localhost',
+            host: "localhost",
         });
         yield server.register([
-            { plugin: require('blipp'), options: { showAuth: true } },
+            { plugin: require("blipp"), options: { showAuth: true } },
         ]);
-        if (webpack_config_1.buildMode === 'production') {
-            const path = path_1.default.resolve(__dirname, '../public');
-            console.log('adding inert and public route', __dirname, path);
-            yield server.register(require('@hapi/inert'));
+        server.route({
+            method: "GET",
+            path: "/text",
+            handler: (request, h) => {
+                return `It's a bunch of text!`;
+            },
+        });
+        server.route([
+            {
+                method: "GET",
+                path: "/dogs/{id*}",
+                handler: (request, h) => {
+                    const allDogs = [
+                        {
+                            id: 1,
+                            name: "Kodabears",
+                            age: 7,
+                            breed: "Husky Mix",
+                        },
+                        {
+                            id: 1,
+                            name: "Coral",
+                            age: 6,
+                            breed: "Chihuahua Mix",
+                        },
+                    ];
+                    const { id } = request.params;
+                    console.log("/dogs route", id);
+                    return id
+                        ? h.response({ dog: "we'll put a dog here" })
+                        : h.response(allDogs);
+                },
+            },
+        ]);
+        if (true || webpack_config_1.buildMode === "production") {
+            const path = path_1.default.resolve(__dirname, "../public");
+            console.log("adding inert and public route", __dirname, path);
+            yield server.register(require("@hapi/inert"));
             server.route([
                 {
-                    method: 'GET',
-                    path: '/{file*}',
+                    method: "GET",
+                    path: "/{file}.{ext}",
                     options: {
                         files: {
-                            relativeTo: path_1.default.join(__dirname, '../public'),
+                            relativeTo: path_1.default.join(__dirname, "../public"),
                         },
                     },
                     handler: (request, h) => {
-                        const { file } = request.params;
-                        return !!file.match(/\.(js|css)$/)
-                            ? h.file(`../public/${file}`)
-                            : h.file('../public/index.html');
+                        const { file, ext } = request.params;
+                        console.log("/{file}.{ext}:", file, ext);
+                        switch (ext) {
+                            default:
+                                return h.file("../public/index.html");
+                            case "css":
+                                return h.file(file + "." + ext).type("text/css");
+                            case "js":
+                                return h
+                                    .file(file + "." + ext)
+                                    .type("text/javascript")
+                                    .code(200);
+                        }
+                    },
+                },
+                {
+                    method: "GET",
+                    path: "/{any*}",
+                    options: {
+                        files: {
+                            relativeTo: path_1.default.join(__dirname, "../public"),
+                        },
+                    },
+                    handler: (request, h) => {
+                        return h.file("../public/index.html");
                     },
                 },
             ]);
         }
-        if (webpack_config_1.buildMode === 'development') {
+        if (webpack_config_1.buildMode === "development") {
             const compiler = (0, webpack_1.default)(webpack_config_1.default);
             const devMiddleware = (0, webpack_dev_middleware_1.default)(compiler, {
                 publicPath: webpack_config_1.default.output.publicPath,
             });
             const hotMiddleware = (0, webpack_hot_middleware_1.default)(compiler);
             server.ext({
-                type: 'onRequest',
+                type: "onRequest",
                 method: (request, h) => {
                     return new Promise((resolve, reject) => {
                         devMiddleware(request.raw.req, request.raw.res, (err) => {
@@ -93,7 +149,7 @@ function init() {
                 },
             });
             server.ext({
-                type: 'onRequest',
+                type: "onRequest",
                 method: (request, h) => {
                     return new Promise((resolve, reject) => {
                         hotMiddleware(request.raw.req, request.raw.res, (err) => {
@@ -106,23 +162,31 @@ function init() {
                 },
             });
             server.ext({
-                type: 'onPreResponse',
+                type: "onPreResponse",
                 method: (request, h) => {
+                    if (isRequestHandled(request))
+                        return h.continue;
                     return new Promise((resolve, reject) => {
-                        const filename = path_1.default.join(compiler.outputPath, 'index.html');
+                        const filename = path_1.default.join(compiler.outputPath, "index.html");
                         compiler.outputFileSystem.readFile(filename, (err, result) => {
                             if (err) {
                                 return reject(err);
                             }
-                            return resolve(h.response(result).type('text/html'));
+                            return resolve(h.response(result).type("text/html"));
                         });
                     });
                 },
             });
         }
-        yield server.start();
+        yield server.start().catch(console.error);
         console.log(`Server running on ${server.info.uri}...`);
     });
 }
 init();
+function isRequestHandled({ response }) {
+    if (boom_1.default.isBoom(response)) {
+        return response.output.statusCode !== 404;
+    }
+    return (response === null || response === void 0 ? void 0 : response.statusCode) !== 404;
+}
 //# sourceMappingURL=server.js.map
