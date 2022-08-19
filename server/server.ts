@@ -5,117 +5,116 @@ import WebpackHotMiddleware from 'webpack-hot-middleware'
 
 import Hapi from '@hapi/hapi'
 
-import * as Config from '../webpack.config'
+import Config, { buildMode } from '../webpack.config'
 
-const host = 'localhost'
-const port = 666
-const compiler = Webpack(Config.devConfig)
-// compiler.apply(new DashboardPlugin())
-
-const devMiddleware = WebpackDevMiddleware(compiler, {
-  publicPath: Config.devConfig.output.publicPath,
-})
-const hotMiddleware = WebpackHotMiddleware(compiler)
+console.log('SERVER!!!!:', buildMode)
 
 async function init() {
   const server = Hapi.server({
-    port: 8666,
+    port: 8000,
     host: 'localhost',
   })
 
-  server.ext({
-    type: 'onRequest',
-    method: (request, h) => {
-      return new Promise((resolve, reject) => {
-        devMiddleware(request.raw.req, request.raw.res, (err) => {
-          if (err) {
-            return reject(err)
-          }
-          return resolve(h.continue)
+  await server.register([
+    { plugin: require('blipp'), options: { showAuth: true } },
+  ])
+
+  if (buildMode === 'production') {
+    const path = Path.resolve(__dirname, '../public')
+    console.log('adding inert and public route', __dirname, path)
+    await server.register(require('@hapi/inert'))
+
+    server.route([
+      // {
+      //   method: 'GET',
+      //   path: '/{file}.js',
+
+      //   handler: {
+      //     directory: {
+      //       path: Path.join(__dirname, '../public'),
+      //     },
+      //   },
+      // },
+      {
+        method: 'GET',
+        path: '/{file*}',
+        options: {
+          files: {
+            relativeTo: Path.join(__dirname, '../public'),
+          },
+        },
+        handler: (request, h) => {
+          const { file } = request.params
+          return !!file.match(/\.(js|css)$/)
+            ? h.file(`../public/${file}`)
+            : h.file('../public/index.html')
+        },
+      },
+    ])
+  }
+
+  if (buildMode === 'development') {
+    const compiler = Webpack(Config)
+    // compiler.apply(new DashboardPlugin())
+
+    const devMiddleware = WebpackDevMiddleware(compiler, {
+      publicPath: Config.output.publicPath,
+    })
+    const hotMiddleware = WebpackHotMiddleware(compiler)
+
+    server.ext({
+      type: 'onRequest',
+      method: (request, h) => {
+        return new Promise((resolve, reject) => {
+          devMiddleware(request.raw.req, request.raw.res, (err) => {
+            if (err) {
+              return reject(err)
+            }
+            return resolve(h.continue)
+          })
         })
-      })
-    },
-  })
+      },
+    })
 
-  server.ext({
-    type: 'onRequest',
-    method: (request, h) => {
-      return new Promise((resolve, reject) => {
-        hotMiddleware(request.raw.req, request.raw.res, (err) => {
-          if (err) {
-            return reject(err)
-          }
+    server.ext({
+      type: 'onRequest',
+      method: (request, h) => {
+        return new Promise((resolve, reject) => {
+          hotMiddleware(request.raw.req, request.raw.res, (err) => {
+            if (err) {
+              return reject(err)
+            }
 
-          return resolve(h.continue)
+            return resolve(h.continue)
+          })
         })
-      })
-    },
-  })
+      },
+    })
 
-  server.ext({
-    type: 'onPreResponse',
-    method: (request, h) => {
-      return new Promise((resolve, reject) => {
-        devMiddleware(request.raw.req, request.raw.res, (err) => {
-          if (err) {
-            return reject('fucking shit')
-          }
+    server.ext({
+      type: 'onPreResponse',
+      method: (request, h) => {
+        return new Promise((resolve, reject) => {
+          const filename = Path.join(compiler.outputPath, 'index.html')
+          compiler.outputFileSystem.readFile(filename, (err, result) => {
+            if (err) {
+              return reject(err)
+            }
 
-          return resolve(h.redirect('/'))
+            return resolve(h.response(result).type('text/html'))
+          })
         })
-      })
-    },
-  })
+      },
+    })
+  }
 
-  // server.ext({
-  //   type: 'onRequest',
-  //   method: function (request, h) {
-  //     const result = devMiddleware(request.raw.req, request.raw.res, (err) => {
-  //       console.log('webpack dev middleware')
-
-  //       if (err) {
-  //         console.error('webpack dev middleware error')
-  //         return h.response('oops')
-  //       }
-
-  //       return h.continue
-  //     })
-
-  //     return 'onRequest handler returned this'
+  // server.route({
+  //   method: 'GET',
+  //   path: '/',
+  //   handler: (request, h) => {
+  //     return 'hi'
   //   },
   // })
-
-  // server.ext('onPreResponse', (request, h) => {
-  //   const response = new Promise((resolve, reject) => {
-  //     const filename = Path.join(compiler.outputPath, 'index.html')
-  //     return compiler.outputFileSystem.readFile(filename, (err, result) => {
-  //       if (err) {
-  //         return reject('oops, error')
-  //       }
-
-  //       // const response = h.response(result).header('content-type', 'text/html')
-
-  //       // return resolve(response)
-
-  //       // return resolve(h.response('result').type('text/html'))
-  //     })
-  //   })
-
-  //   // return h
-  //   //   .response('<p>fuck you, bitch</p>')
-  //   //   .header('cache-contorl', 'no-cache')
-  //   //   .type('text/html')
-
-  //   return h.continue
-  // })
-
-  server.route({
-    method: 'GET',
-    path: '/',
-    handler: (request, h) => {
-      return 'hi'
-    },
-  })
 
   await server.start()
 

@@ -21,12 +21,12 @@ update msg model =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "Whatever App"
+    { title = "Hwet Stack Example"
     , body =
         [ div []
-            [ text "Elm sends his regards from the view function"
-            , input [] []
-            , div [] [ text "dddddddd" ]
+            [ h1 [] [ text "Hapi-Webpack-Elm-TypeScript Example" ]
+            , p [] [ text "Example app, we'll put something here later." ]
+            , pre [] [ code [] [ text <| Url.toString model.earl ] ]
             ]
         ]
     }

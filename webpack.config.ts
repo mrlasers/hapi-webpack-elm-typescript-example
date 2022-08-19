@@ -1,27 +1,41 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import Path from 'path'
-import Webpack, { webpack } from 'webpack'
+import Webpack, { Configuration } from 'webpack'
+import { merge } from 'webpack-merge'
 
-export const devConfig: Webpack.Configuration = {
-  mode: 'development',
-  devtool: 'inline-source-map',
-  entry: [
-    // 'webpack-dev-middleware/client',
-    'webpack-hot-middleware/client',
-    './client/static/index.js',
-    // './client/static/index.html',
+const isProd = process.env.NODE_ENV === 'production'
+const isDev = !isProd
+
+export const buildMode =
+  process.env.NODE_ENV === 'production' ? 'production' : 'development'
+
+const commonConfig: Configuration = {
+  mode: buildMode,
+  entry: ['./client/static/index.js'],
+  resolve: {
+    extensions: ['.js', '.elm'],
+  },
+  module: {
+    noParse: /\.elm$/,
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './client/static/index.html',
+      filename: 'index.html',
+      inject: 'body',
+    }),
   ],
+}
+
+const devConfig: Configuration = {
+  devtool: 'cheap-module-source-map',
+  entry: ['webpack-hot-middleware/client'],
   output: {
     filename: '[name].js',
     path: Path.resolve(__dirname, 'dist'),
     publicPath: '/',
   },
-  resolve: {
-    extensions: ['.js', '.elm'],
-  },
-
   module: {
-    noParse: /\.elm$/,
     rules: [
       {
         test: /\.elm$/,
@@ -30,12 +44,26 @@ export const devConfig: Webpack.Configuration = {
       },
     ],
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './client/static/index.html',
-      filename: 'index.html',
-      inject: 'body',
-    }),
-    new Webpack.HotModuleReplacementPlugin(),
-  ],
+  plugins: [new Webpack.HotModuleReplacementPlugin()],
 }
+
+const prodConfig: Configuration = {
+  module: {
+    rules: [
+      {
+        test: /\.elm$/,
+        exclude: [/elm-stuff/, /node_moduls/],
+        use: ['elm-webpack-loader'],
+      },
+    ],
+  },
+  output: {
+    filename: '[name].js',
+    path: Path.resolve(__dirname, 'dist/public'),
+    publicPath: '/',
+  },
+}
+
+const mergedConfig = merge(commonConfig, isDev ? devConfig : prodConfig)
+
+export default mergedConfig
