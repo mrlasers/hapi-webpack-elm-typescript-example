@@ -74,21 +74,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hapi/boom@npm:*, @hapi/boom@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "@hapi/boom@npm:10.0.0"
+  dependencies:
+    "@hapi/hoek": 10.x.x
+  checksum: ea2b234fa1c76667b73a541f51e83251233a6f1db2a3f6ade9beb5174ce0ed2b55eea4d8a2a9fd0329bba31e1969c41bdb3af9218bef3abac58a30ea28e3d43e
+  languageName: node
+  linkType: hard
+
 "@hapi/boom@npm:9.x.x, @hapi/boom@npm:^9.0.0, @hapi/boom@npm:^9.1.0":
   version: 9.1.4
   resolution: "@hapi/boom@npm:9.1.4"
   dependencies:
     "@hapi/hoek": 9.x.x
   checksum: b1cdde1e82fae8222d893ac74e13e9a784f0398ffcb7ece32f6eb69bad990ca62f3c40cca19673e74cc676628ff121ee5576d6b0f1add92dcfa182ff9b90b937
-  languageName: node
-  linkType: hard
-
-"@hapi/boom@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "@hapi/boom@npm:10.0.0"
-  dependencies:
-    "@hapi/hoek": 10.x.x
-  checksum: ea2b234fa1c76667b73a541f51e83251233a6f1db2a3f6ade9beb5174ce0ed2b55eea4d8a2a9fd0329bba31e1969c41bdb3af9218bef3abac58a30ea28e3d43e
   languageName: node
   linkType: hard
 
@@ -665,6 +665,15 @@ __metadata:
     "@types/minimatch": "*"
     "@types/node": "*"
   checksum: 6ae717fedfdfdad25f3d5a568323926c64f52ef35897bcac8aca8e19bc50c0bd84630bbd063e5d52078b2137d8e7d3c26eabebd1a2f03ff350fff8a91e79fc19
+  languageName: node
+  linkType: hard
+
+"@types/hapi__boom@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "@types/hapi__boom@npm:9.0.1"
+  dependencies:
+    "@hapi/boom": "*"
+  checksum: 980d86b8e434bb13b36dcc4407e4817adbe98879426c89669ae6600cbaca8e607bd29559135ecb2c5ccb53f6a68adde71720b56f21f5a588620191dee2994808
   languageName: node
   linkType: hard
 
@@ -2350,8 +2359,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "hapi-webpack-dev@workspace:."
   dependencies:
+    "@hapi/boom": ^10.0.0
     "@hapi/hapi": ^20.2.2
     "@hapi/inert": ^7.0.0
+    "@types/hapi__boom": ^9.0.1
     "@types/hapi__hapi": ^20.0.12
     "@types/hapi__inert": ^5.2.3
     "@types/node": ^18.7.6

@@ -33,8 +33,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         [null, {\
           "packageLocation": "./",\
           "packageDependencies": [\
+            ["@hapi/boom", "npm:10.0.0"],\
             ["@hapi/hapi", "npm:20.2.2"],\
             ["@hapi/inert", "npm:7.0.0"],\
+            ["@types/hapi__boom", "npm:9.0.1"],\
             ["@types/hapi__hapi", "npm:20.0.12"],\
             ["@types/hapi__inert", "npm:5.2.3"],\
             ["@types/node", "npm:18.7.6"],\
@@ -799,6 +801,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/glob", "npm:7.2.0"],\
             ["@types/minimatch", "npm:3.0.5"],\
             ["@types/node", "npm:18.7.6"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@types/hapi__boom", [\
+        ["npm:9.0.1", {\
+          "packageLocation": "./.yarn/cache/@types-hapi__boom-npm-9.0.1-facaff544a-980d86b8e4.zip/node_modules/@types/hapi__boom/",\
+          "packageDependencies": [\
+            ["@types/hapi__boom", "npm:9.0.1"],\
+            ["@hapi/boom", "npm:10.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -2817,8 +2829,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./",\
           "packageDependencies": [\
             ["hapi-webpack-dev", "workspace:."],\
+            ["@hapi/boom", "npm:10.0.0"],\
             ["@hapi/hapi", "npm:20.2.2"],\
             ["@hapi/inert", "npm:7.0.0"],\
+            ["@types/hapi__boom", "npm:9.0.1"],\
             ["@types/hapi__hapi", "npm:20.0.12"],\
             ["@types/hapi__inert", "npm:5.2.3"],\
             ["@types/node", "npm:18.7.6"],\
