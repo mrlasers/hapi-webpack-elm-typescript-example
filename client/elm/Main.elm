@@ -3,10 +3,12 @@ module Main exposing (main)
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
+import Html.Attributes exposing (class, href)
 import Http
 import Json.Decode as D
 import Json.Decode.Pipeline as DP
 import Url exposing (Url)
+import Url.Parser as Parser exposing ((</>), Parser, oneOf, s, string)
 
 
 type alias Dog =
@@ -34,11 +36,32 @@ fetchDogs =
         }
 
 
+type Route
+    = Home
+    | Buttholes
+    | NotHome
+
+
+parser : Parser (Route -> a) a
+parser =
+    Parser.oneOf
+        [ Parser.map Home Parser.top
+        , Parser.map Buttholes (Parser.s "holes")
+        ]
+
+
+fromUrl : Url -> Maybe Route
+fromUrl url =
+    { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing }
+        |> Parser.parse parser
+
+
 type alias Model =
-    { navKey : Nav.Key
+    { key : Nav.Key
     , earl : Url
     , text : Maybe String
-    , dogs : List { id : Int, name : String }
+    , dogs : List Dog
+    , route : Maybe Route
     }
 
 
@@ -46,6 +69,7 @@ type Msg
     = Noop
     | GotText (Result Http.Error String)
     | GotDogs (Result Http.Error (List Dog))
+    | ClickedLink Browser.UrlRequest
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -70,14 +94,26 @@ update msg model =
                 Err _ ->
                     ( model, Cmd.none )
 
+        ClickedLink request ->
+            case request of
+                Browser.Internal url ->
+                    ( { model | route = fromUrl url }, Nav.pushUrl model.key (Url.toString url) )
+
+                Browser.External _ ->
+                    ( model, Cmd.none )
+
 
 view : Model -> Browser.Document Msg
 view model =
     { title = "Hwet Stack Example"
     , body =
-        [ div []
+        [ header []
             [ h1 [] [ text "Hapi-Webpack-Elm-TypeScript Example" ]
-            , p [] [ text "Example app, we'll put something here later." ]
+            , a [ href "/" ] [ text "Butts" ]
+            , a [ href "/holes" ] [ text "Holes" ]
+            ]
+        , div []
+            [ p [] [ text "Example app, we'll put something here later." ]
             , pre [] [ code [] [ text <| Url.toString model.earl ] ]
             , case model.text of
                 Just str ->
@@ -92,10 +128,11 @@ view model =
 
 init : flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url key =
-    ( { navKey = key
+    ( { key = key
       , earl = url
       , text = Nothing
       , dogs = []
+      , route = Nothing
       }
     , fetchDogs
     )
@@ -108,6 +145,6 @@ main =
         , view = view
         , update = update
         , subscriptions = \_ -> Sub.none
-        , onUrlRequest = \_ -> Noop
+        , onUrlRequest = ClickedLink
         , onUrlChange = \_ -> Noop
         }

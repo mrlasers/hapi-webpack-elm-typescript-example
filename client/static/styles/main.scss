@@ -1,3 +1,35 @@
+html {
+  box-sizing: border-box;
+}
+
+html *,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
 body {
   background-color: silver;
+  margin: 0;
+}
+
+header {
+  background-color: lightcoral;
+
+  a {
+    padding: 0.5em;
+    margin: 0.25em;
+    display: inline-block;
+    background-color: white;
+    color: yellowgreen;
+    border-radius: 0.5em;
+
+    text-decoration: none;
+    font-weight: bold;
+
+    &:hover {
+      background-color: yellowgreen;
+      color: white;
+    }
+  }
 }
